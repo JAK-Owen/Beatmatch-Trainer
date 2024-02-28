@@ -7,19 +7,16 @@ body {
     background-color: #222;
 }
 
-.pitch-fader {
-    width: 20px;
-    height: 200px;
-    background-color: #fff;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+.pitch-slider {
+    width: 200px;
+    margin: 10px;
 }
 
-#leftFader {
-    left: 50px;
+#leftSlider {
+    transform: rotate(270deg);
 }
 
-#rightFader {
-    right: 50px;
+#rightSlider {
+    transform: rotate(90deg);
 }
+

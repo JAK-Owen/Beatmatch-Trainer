@@ -8,9 +8,10 @@
 </head>
 <body>
     <button id="startButton">Start Metronomes</button>
-    <div class="pitch-fader" id="leftFader"></div>
-    <div class="pitch-fader" id="rightFader"></div>
+    <input type="range" class="pitch-slider" id="leftSlider" min="-50" max="50" value="0">
+    <input type="range" class="pitch-slider" id="rightSlider" min="-50" max="50" value="0">
     <script src="https://cdn.jsdelivr.net/npm/tone"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

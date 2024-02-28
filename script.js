@@ -2,13 +2,17 @@
 const leftTransport = Tone.Transport;
 const rightTransport = Tone.Transport;
 
-// Initialize pitch faders
-const leftFader = document.getElementById('leftFader');
-const rightFader = document.getElementById('rightFader');
+// Initialize BPM sliders
+const leftSlider = document.getElementById('leftSlider');
+const rightSlider = document.getElementById('rightSlider');
 
 // Set initial random BPMs
 const leftBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 const rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+
+// Set initial fixed pitches (C4 and F4)
+const fixedPitchLeft = 'C4';
+const fixedPitchRight = 'F4';
 
 // Initialize Tone.js Synths with MembraneSynth
 const leftSynth = new Tone.MembraneSynth({
@@ -33,15 +37,13 @@ const rightSynth = new Tone.MembraneSynth({
     }
 }).toDestination();
 
-// Set initial BPM and pitch
+// Set initial BPM
 leftTransport.bpm.value = leftBPM;
 rightTransport.bpm.value = rightBPM;
 
-leftSynth.set({ "detune": 0 });
-rightSynth.set({ "detune": 0 });
-
 // Start clicks on user gesture (e.g., button click)
 document.getElementById('startButton').addEventListener('click', () => {
+    console.log('Button clicked');
     // Check if the audio context is in a suspended state
     if (Tone.context.state === 'suspended') {
         Tone.context.resume().then(() => {
@@ -49,11 +51,13 @@ document.getElementById('startButton').addEventListener('click', () => {
             startClicks();
         });
     } else {
+        console.log('Audio context already active');
         startClicks();
     }
 });
 
 function startClicks() {
+    console.log('Starting clicks...');
     // If the clicks are already started, stop them
     if (leftTransport.state === 'started') {
         leftTransport.stop();
@@ -65,13 +69,15 @@ function startClicks() {
     }
 
     // Use Tone.Sequence for scheduling events for left and right
-    const leftSequence = new Tone.Sequence((time, note) => {
-        leftSynth.triggerAttackRelease(note, '8n', time);
-    }, ['C4'], '8n');
+    const leftSequence = new Tone.Sequence((time) => {
+        console.log('Left trigger');
+        leftSynth.triggerAttackRelease(fixedPitchLeft, '8n', time);
+    }, [null], '8n');
 
-    const rightSequence = new Tone.Sequence((time, note) => {
-        rightSynth.triggerAttackRelease(note, '8n', time);
-    }, ['F4'], '8n');
+    const rightSequence = new Tone.Sequence((time) => {
+        console.log('Right trigger');
+        rightSynth.triggerAttackRelease(fixedPitchRight, '8n', time);
+    }, [null], '8n');
 
     // Start the sequences
     leftSequence.start();
@@ -82,44 +88,51 @@ function startClicks() {
     rightTransport.start();
 }
 
-
-// Update pitch and BPM on fader movement
-leftFader.addEventListener('input', updateLeft);
-rightFader.addEventListener('input', updateRight);
+// Update BPM on slider movement
+leftSlider.addEventListener('input', updateLeft);
+rightSlider.addEventListener('input', updateRight);
 
 function updateLeft() {
-    const pitchValue = parseFloat(leftFader.value);
-    const bpmValue = mapPitchToBPM(pitchValue);
+    let detuneValue = parseFloat(leftSlider.value);
+    
+    // Invert the direction for left slider
+    detuneValue = -detuneValue;
+
+    // Ensure detuneValue stays within a reasonable range
+    detuneValue = Math.max(-50, Math.min(50, detuneValue));
+
+    const bpmValue = mapDetuneToBPM(detuneValue);
     leftTransport.bpm.value = bpmValue;
-    leftSynth.set({ "detune": pitchValue * 100 });
+    console.log('Left BPM:', bpmValue);
 }
 
 function updateRight() {
-    const pitchValue = parseFloat(rightFader.value);
-    const bpmValue = mapPitchToBPM(pitchValue);
+    let detuneValue = parseFloat(rightSlider.value);
+    
+    // Ensure detuneValue stays within a reasonable range
+    detuneValue = Math.max(-50, Math.min(50, detuneValue));
+
+    const bpmValue = mapDetuneToBPM(detuneValue);
     rightTransport.bpm.value = bpmValue;
-    rightSynth.set({ "detune": pitchValue * 100 });
+    console.log('Right BPM:', bpmValue);
 }
 
-function mapPitchToBPM(pitch) {
-    // Map pitch values to a reasonable range of BPM
+function mapDetuneToBPM(detune) {
+    // Map detune values to a reasonable range of BPM
     const minBPM = 60;
     const maxBPM = 180;
-    const mappedBPM = minBPM + (pitch + 1) * (maxBPM - minBPM) / 2;
+    const mappedBPM = minBPM + (detune + 50) * (maxBPM - minBPM) / 100;
 
-    return Math.round(mappedBPM);
+    return Math.max(minBPM, Math.min(maxBPM, Math.round(mappedBPM)));
 }
 
-// Refresh function to set random BPMs and reset faders on page reload
+// Refresh function to set random BPMs and reset sliders on page reload
 function refresh() {
-    leftFader.value = 0;
-    rightFader.value = 0;
+    leftSlider.value = 0;
+    rightSlider.value = 0;
 
     leftTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
     rightTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
-
-    leftSynth.set({ "detune": 0 });
-    rightSynth.set({ "detune": 0 });
 }
 
 // Call refresh on page load
