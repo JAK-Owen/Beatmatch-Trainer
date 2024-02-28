@@ -74,7 +74,7 @@ function startClicks() {
     }, ['F4'], '8n');
 
     // Start the sequences
-    leftSequence.start('+0.1');
+    leftSequence.start();
     rightSequence.start();
 
     // Start the left and right transports
