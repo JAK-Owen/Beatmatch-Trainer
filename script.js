@@ -1,6 +1,6 @@
 // Initialize Tone.js
-const leftMetronome = Tone.Transport;
-const rightMetronome = Tone.Transport;
+const leftTransport = Tone.Transport;
+const rightTransport = Tone.Transport;
 
 // Initialize pitch faders
 const leftFader = document.getElementById('leftFader');
@@ -9,10 +9,6 @@ const rightFader = document.getElementById('rightFader');
 // Set initial random BPMs
 const leftBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 const rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
-
-// Set initial random pitches a 5th apart
-const leftPitch = 0;
-const rightPitch = 7;
 
 // Initialize Tone.js Synths with MembraneSynth
 const leftSynth = new Tone.MembraneSynth({
@@ -38,52 +34,80 @@ const rightSynth = new Tone.MembraneSynth({
 }).toDestination();
 
 // Set initial BPM and pitch
-leftMetronome.bpm.value = leftBPM;
-rightMetronome.bpm.value = rightBPM;
+leftTransport.bpm.value = leftBPM;
+rightTransport.bpm.value = rightBPM;
 
-leftSynth.set({ "detune": leftPitch * 100 });
-rightSynth.set({ "detune": rightPitch * 100 });
+leftSynth.set({ "detune": 0 });
+rightSynth.set({ "detune": 0 });
 
-// Start metronomes on user gesture (e.g., button click)
+// Start clicks on user gesture (e.g., button click)
 document.getElementById('startButton').addEventListener('click', () => {
     // Check if the audio context is in a suspended state
     if (Tone.context.state === 'suspended') {
         Tone.context.resume().then(() => {
             console.log('Audio context resumed');
-            startMetronomes();
+            startClicks();
         });
     } else {
-        startMetronomes();
+        startClicks();
     }
 });
 
-function startMetronomes() {
-    // Schedule a tick sound every quarter note
-    leftMetronome.scheduleRepeat((time) => {
-        leftSynth.triggerAttackRelease('C4', '8n', time);
-    }, '8n');
+function startClicks() {
+    // If the clicks are already started, stop them
+    if (leftTransport.state === 'started') {
+        leftTransport.stop();
+        leftTransport.position = 0; // Reset position
+    }
+    if (rightTransport.state === 'started') {
+        rightTransport.stop();
+        rightTransport.position = 0; // Reset position
+    }
 
-    rightMetronome.scheduleRepeat((time) => {
-        rightSynth.triggerAttackRelease('C4', '8n', time);
-    }, '8n');
+    // Use Tone.Sequence for scheduling events for left and right
+    const leftSequence = new Tone.Sequence((time, note) => {
+        leftSynth.triggerAttackRelease(note, '8n', time);
+    }, ['C4'], '8n');
 
-    // Start the metronomes
-    leftMetronome.start();
-    rightMetronome.start();
+    const rightSequence = new Tone.Sequence((time, note) => {
+        rightSynth.triggerAttackRelease(note, '8n', time);
+    }, ['F4'], '8n');
+
+    // Start the sequences
+    leftSequence.start('+0.1');
+    rightSequence.start();
+
+    // Start the left and right transports
+    leftTransport.start();
+    rightTransport.start();
 }
+
 
 // Update pitch and BPM on fader movement
 leftFader.addEventListener('input', updateLeft);
 rightFader.addEventListener('input', updateRight);
 
 function updateLeft() {
-    const value = parseFloat(leftFader.value);
-    leftSynth.set({ "detune": value * 100 });
+    const pitchValue = parseFloat(leftFader.value);
+    const bpmValue = mapPitchToBPM(pitchValue);
+    leftTransport.bpm.value = bpmValue;
+    leftSynth.set({ "detune": pitchValue * 100 });
 }
 
 function updateRight() {
-    const value = parseFloat(rightFader.value);
-    rightSynth.set({ "detune": value * 100 });
+    const pitchValue = parseFloat(rightFader.value);
+    const bpmValue = mapPitchToBPM(pitchValue);
+    rightTransport.bpm.value = bpmValue;
+    rightSynth.set({ "detune": pitchValue * 100 });
+}
+
+function mapPitchToBPM(pitch) {
+    // Map pitch values to a reasonable range of BPM
+    const minBPM = 60;
+    const maxBPM = 180;
+    const mappedBPM = minBPM + (pitch + 1) * (maxBPM - minBPM) / 2;
+
+    return Math.round(mappedBPM);
 }
 
 // Refresh function to set random BPMs and reset faders on page reload
@@ -91,11 +115,11 @@ function refresh() {
     leftFader.value = 0;
     rightFader.value = 0;
 
-    leftMetronome.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
-    rightMetronome.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+    leftTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+    rightTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 
-    leftSynth.set({ "detune": leftPitch * 100 });
-    rightSynth.set({ "detune": rightPitch * 100 });
+    leftSynth.set({ "detune": 0 });
+    rightSynth.set({ "detune": 0 });
 }
 
 // Call refresh on page load
