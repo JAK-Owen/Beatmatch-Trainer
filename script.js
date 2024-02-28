@@ -14,9 +14,28 @@ const rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 const leftPitch = 0;
 const rightPitch = 7;
 
-// Initialize Tone.js Synths
-const leftSynth = new Tone.Synth().toDestination();
-const rightSynth = new Tone.Synth().toDestination();
+// Initialize Tone.js Synths with MembraneSynth
+const leftSynth = new Tone.MembraneSynth({
+    pitchDecay: 0.05,
+    octaves: 4,
+    envelope: {
+        attack: 0.001,
+        decay: 0.1,
+        sustain: 0.1,
+        release: 0.1
+    }
+}).toDestination();
+
+const rightSynth = new Tone.MembraneSynth({
+    pitchDecay: 0.05,
+    octaves: 4,
+    envelope: {
+        attack: 0.001,
+        decay: 0.1,
+        sustain: 0.1,
+        release: 0.1
+    }
+}).toDestination();
 
 // Set initial BPM and pitch
 leftMetronome.bpm.value = leftBPM;
@@ -39,6 +58,15 @@ document.getElementById('startButton').addEventListener('click', () => {
 });
 
 function startMetronomes() {
+    // Schedule a tick sound every quarter note
+    leftMetronome.scheduleRepeat((time) => {
+        leftSynth.triggerAttackRelease('C4', '8n', time);
+    }, '8n');
+
+    rightMetronome.scheduleRepeat((time) => {
+        rightSynth.triggerAttackRelease('C4', '8n', time);
+    }, '8n');
+
     // Start the metronomes
     leftMetronome.start();
     rightMetronome.start();
