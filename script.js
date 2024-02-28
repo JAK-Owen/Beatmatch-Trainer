@@ -7,8 +7,8 @@ const leftSlider = document.getElementById('leftSlider');
 const rightSlider = document.getElementById('rightSlider');
 
 // Set initial random BPMs
-const leftBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
-const rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+let leftBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+let rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 
 // Set initial fixed pitches (C4 and F4)
 const fixedPitchLeft = 'C4';
@@ -18,11 +18,12 @@ const fixedPitchRight = 'F4';
 const leftSynth = new Tone.Synth().toDestination();
 const rightSynth = new Tone.Synth().toDestination();
 
-// Set initial BPM
-leftTransport.bpm.value = leftBPM;
-rightTransport.bpm.value = rightBPM;
+// Function to play a note with a specific synth at a given time
+function playNoteAtTime(synth, pitch, time) {
+    synth.triggerAttackRelease(pitch, '8n', time);
+}
 
-// Play a single note when the button is clicked
+// Start the metronomes on button click
 document.getElementById('startButton').addEventListener('click', () => {
     console.log('Button clicked');
 
@@ -30,18 +31,35 @@ document.getElementById('startButton').addEventListener('click', () => {
     if (Tone.context.state === 'suspended') {
         Tone.context.resume().then(() => {
             console.log('Audio context resumed');
-            playSingleNote();
+            startMetronomes();
         });
     } else {
         console.log('Audio context already active');
-        playSingleNote();
+        startMetronomes();
     }
 });
 
-function playSingleNote() {
-    // Play a simple note with the left and right synths
-    leftSynth.triggerAttackRelease('C4', '8n');
-    rightSynth.triggerAttackRelease('F4', '8n');
+// Function to start the metronomes
+function startMetronomes() {
+    // Clear any existing events
+    Tone.Transport.cancel();
+
+    // Set initial BPMs
+    leftTransport.bpm.value = leftBPM;
+    rightTransport.bpm.value = rightBPM;
+
+    // Schedule events for left and right metronomes
+    leftTransport.scheduleRepeat((time) => {
+        playNoteAtTime(leftSynth, fixedPitchLeft, time);
+    }, '8n');
+
+    rightTransport.scheduleRepeat((time) => {
+        playNoteAtTime(rightSynth, fixedPitchRight, time);
+    }, '8n');
+
+    // Start the transports
+    leftTransport.start();
+    rightTransport.start();
 }
 
 // Update BPM on slider movement
@@ -58,8 +76,9 @@ function updateLeft() {
     detuneValue = Math.max(-50, Math.min(50, detuneValue));
 
     const bpmValue = mapDetuneToBPM(detuneValue);
-    leftTransport.bpm.value = bpmValue;
+    leftBPM = bpmValue;
     console.log('Left BPM:', bpmValue);
+    startMetronomes(); // Restart metronomes when BPM changes
 }
 
 function updateRight() {
@@ -69,8 +88,9 @@ function updateRight() {
     detuneValue = Math.max(-50, Math.min(50, detuneValue));
 
     const bpmValue = mapDetuneToBPM(detuneValue);
-    rightTransport.bpm.value = bpmValue;
+    rightBPM = bpmValue;
     console.log('Right BPM:', bpmValue);
+    startMetronomes(); // Restart metronomes when BPM changes
 }
 
 function mapDetuneToBPM(detune) {
@@ -87,8 +107,10 @@ function refresh() {
     leftSlider.value = 0;
     rightSlider.value = 0;
 
-    leftTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
-    rightTransport.bpm.value = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+    leftBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+    rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
+
+    startMetronomes(); // Start metronomes with new BPMs
 }
 
 // Call refresh on page load
