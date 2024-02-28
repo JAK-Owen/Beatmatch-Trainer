@@ -14,78 +14,34 @@ const rightBPM = Math.floor(Math.random() * (150 - 90 + 1)) + 90;
 const fixedPitchLeft = 'C4';
 const fixedPitchRight = 'F4';
 
-// Initialize Tone.js Synths with MembraneSynth
-const leftSynth = new Tone.MembraneSynth({
-    pitchDecay: 0.05,
-    octaves: 4,
-    envelope: {
-        attack: 0.001,
-        decay: 0.1,
-        sustain: 0.1,
-        release: 0.1
-    }
-}).toDestination();
-
-const rightSynth = new Tone.MembraneSynth({
-    pitchDecay: 0.05,
-    octaves: 4,
-    envelope: {
-        attack: 0.001,
-        decay: 0.1,
-        sustain: 0.1,
-        release: 0.1
-    }
-}).toDestination();
+// Initialize Tone.js Synths with basic Synth
+const leftSynth = new Tone.Synth().toDestination();
+const rightSynth = new Tone.Synth().toDestination();
 
 // Set initial BPM
 leftTransport.bpm.value = leftBPM;
 rightTransport.bpm.value = rightBPM;
 
-// Start clicks on user gesture (e.g., button click)
+// Play a single note when the button is clicked
 document.getElementById('startButton').addEventListener('click', () => {
     console.log('Button clicked');
+
     // Check if the audio context is in a suspended state
     if (Tone.context.state === 'suspended') {
         Tone.context.resume().then(() => {
             console.log('Audio context resumed');
-            startClicks();
+            playSingleNote();
         });
     } else {
         console.log('Audio context already active');
-        startClicks();
+        playSingleNote();
     }
 });
 
-function startClicks() {
-    console.log('Starting clicks...');
-    // If the clicks are already started, stop them
-    if (leftTransport.state === 'started') {
-        leftTransport.stop();
-        leftTransport.position = 0; // Reset position
-    }
-    if (rightTransport.state === 'started') {
-        rightTransport.stop();
-        rightTransport.position = 0; // Reset position
-    }
-
-    // Use Tone.Sequence for scheduling events for left and right
-    const leftSequence = new Tone.Sequence((time) => {
-        console.log('Left trigger');
-        leftSynth.triggerAttackRelease(fixedPitchLeft, '8n', time);
-    }, [null], '8n');
-
-    const rightSequence = new Tone.Sequence((time) => {
-        console.log('Right trigger');
-        rightSynth.triggerAttackRelease(fixedPitchRight, '8n', time);
-    }, [null], '8n');
-
-    // Start the sequences
-    leftSequence.start();
-    rightSequence.start();
-
-    // Start the left and right transports
-    leftTransport.start();
-    rightTransport.start();
+function playSingleNote() {
+    // Play a simple note with the left and right synths
+    leftSynth.triggerAttackRelease('C4', '8n');
+    rightSynth.triggerAttackRelease('F4', '8n');
 }
 
 // Update BPM on slider movement
@@ -94,8 +50,8 @@ rightSlider.addEventListener('input', updateRight);
 
 function updateLeft() {
     let detuneValue = parseFloat(leftSlider.value);
-    
-    // Invert the direction for left slider
+
+    // Invert the direction for the left slider
     detuneValue = -detuneValue;
 
     // Ensure detuneValue stays within a reasonable range
@@ -108,7 +64,7 @@ function updateLeft() {
 
 function updateRight() {
     let detuneValue = parseFloat(rightSlider.value);
-    
+
     // Ensure detuneValue stays within a reasonable range
     detuneValue = Math.max(-50, Math.min(50, detuneValue));
 
