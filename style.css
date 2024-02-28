@@ -1,0 +1,25 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #222;
+}
+
+.pitch-fader {
+    width: 20px;
+    height: 200px;
+    background-color: #fff;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#leftFader {
+    left: 50px;
+}
+
+#rightFader {
+    right: 50px;
+}
