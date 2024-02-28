@@ -42,7 +42,8 @@ document.getElementById('startButton').addEventListener('click', () => {
 // Function to start the metronomes
 function startMetronomes() {
     // Clear any existing events
-    Tone.Transport.cancel();
+    leftTransport.cancel();
+    rightTransport.cancel();
 
     // Set initial BPMs
     leftTransport.bpm.value = leftBPM;
@@ -75,10 +76,9 @@ function updateLeft() {
     // Ensure detuneValue stays within a reasonable range
     detuneValue = Math.max(-50, Math.min(50, detuneValue));
 
-    const bpmValue = mapDetuneToBPM(detuneValue);
-    leftBPM = bpmValue;
-    console.log('Left BPM:', bpmValue);
-    startMetronomes(); // Restart metronomes when BPM changes
+    leftBPM = mapDetuneToBPM(detuneValue);
+    leftTransport.bpm.linearRampToValueAtTime(leftBPM, Tone.now() + 0.1); // Linear adjustment
+    console.log('Left BPM:', leftBPM);
 }
 
 function updateRight() {
@@ -87,10 +87,9 @@ function updateRight() {
     // Ensure detuneValue stays within a reasonable range
     detuneValue = Math.max(-50, Math.min(50, detuneValue));
 
-    const bpmValue = mapDetuneToBPM(detuneValue);
-    rightBPM = bpmValue;
-    console.log('Right BPM:', bpmValue);
-    startMetronomes(); // Restart metronomes when BPM changes
+    rightBPM = mapDetuneToBPM(detuneValue);
+    rightTransport.bpm.linearRampToValueAtTime(rightBPM, Tone.now() + 0.1); // Linear adjustment
+    console.log('Right BPM:', rightBPM);
 }
 
 function mapDetuneToBPM(detune) {
