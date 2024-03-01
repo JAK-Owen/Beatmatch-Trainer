@@ -4,6 +4,10 @@ let rightMetronome;
 let leftIntervalId;
 let rightIntervalId;
 
+// Set constant pitches for left and right metronomes
+const fixedPitchLeft = 'C3';
+const fixedPitchRight = 'F3';
+
 document.getElementById('leftPitch').addEventListener('input', updateLeftPitch);
 document.getElementById('rightPitch').addEventListener('input', updateRightPitch);
 document.getElementById('playButton').addEventListener('click', startAudioContext);
@@ -29,24 +33,30 @@ function createMetronome() {
 
 function updateLeftPitch() {
   if (leftMetronome) {
-    const pitch = parseFloat(document.getElementById('leftPitch').value);
-    updateMetronome(leftMetronome, pitch);
+    updateMetronome(leftMetronome, 0); // Using a pitch value of 0 for C3
   }
 }
 
 function updateRightPitch() {
   if (rightMetronome) {
-    const pitch = parseFloat(document.getElementById('rightPitch').value);
-    updateMetronome(rightMetronome, pitch);
+    updateMetronome(rightMetronome, 0); // Using a pitch value of 0 for F3
   }
 }
 
 function updateMetronome(metronome, pitch) {
-  const frequency = 440 * Math.pow(2, pitch / 12);
-  metronome.oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  // Use predefined pitches for the left and right metronomes
+  const pitchValue = metronome === leftMetronome ? 'C3' : 'F3';
+
+  // Ensure pitch is a valid finite number
+  const frequency = parseFloat(pitchValue);
+  if (!isNaN(frequency) && isFinite(frequency)) {
+    metronome.oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  }
+
   metronome.gainNode.gain.setValueAtTime(1, audioContext.currentTime);
   metronome.gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
 }
+
 
 function startAudioContext() {
   if (!audioContext) {
