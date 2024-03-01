@@ -4,16 +4,17 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background-color: #282c34;
+    background-color: #222222;
     color: white;
-  }
-  
-  .pitch-fader {
-    width: 200px;
-  }
-  
-  #leftMetronome, #rightMetronome {
+}
+
+.pitch-fader {
+    height: 200px; 
+    transform: rotate(270deg); /* Rotate the slider vertically */
+    margin: 0 20px;
+}
+
+#leftMetronome, #rightMetronome {
     display: inline-block;
     margin: 0 20px;
-  }
-  
+}
