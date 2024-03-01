@@ -1,22 +1,19 @@
 body {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     height: 100vh;
     margin: 0;
-    background-color: #222;
-}
-
-.pitch-slider {
+    background-color: #282c34;
+    color: white;
+  }
+  
+  .pitch-fader {
     width: 200px;
-    margin: 10px;
-}
-
-#leftSlider {
-    transform: rotate(270deg);
-}
-
-#rightSlider {
-    transform: rotate(90deg);
-}
-
+  }
+  
+  #leftMetronome, #rightMetronome {
+    display: inline-block;
+    margin: 0 20px;
+  }
+  

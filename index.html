@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Beatmatch Trainer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Beatmatch-Trainer</title>
 </head>
 <body>
-    <button id="startButton">Start Metronomes</button>
-    <input type="range" class="pitch-slider" id="leftSlider" min="-50" max="50" value="0">
-    <input type="range" class="pitch-slider" id="rightSlider" min="-50" max="50" value="0">
-    <script src="https://cdn.jsdelivr.net/npm/tone"></script>
-    <script src="script.js"></script>
-</body>
+  <input type="range" id="leftPitch" class="pitch-fader" min="-50" max="50" value="0" />
+  <div id="leftMetronome">A</div>
 
+  <button id="playButton">Play</button>
+
+  <div id="rightMetronome">B</div>
+  <input type="range" id="rightPitch" class="pitch-fader" min="-50" max="50" value="0" />
+
+  <script src="script.js"></script>
+</body>
 </html>
