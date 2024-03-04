@@ -12,40 +12,46 @@ document.getElementById('leftPitch').addEventListener('input', updateLeftPitch);
 document.getElementById('rightPitch').addEventListener('input', updateRightPitch);
 document.getElementById('playButton').addEventListener('click', startAudioContext);
 
-function createMetronome() {
+function createMetronome(panValue) {
   if (!audioContext) {
     return null;  // Return null if audioContext is not initialized yet
   }
 
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
+  const panNode = audioContext.createStereoPanner(); // Added panner node
 
   oscillator.type = 'sine';
   oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(panNode); // Connect gain node to panner node
+  panNode.connect(audioContext.destination);
   oscillator.start();
+
+  // Set initial pan value
+  panNode.pan.value = panValue;
 
   return {
     oscillator,
-    gainNode
+    gainNode,
+    panNode
   };
 }
 
 function updateLeftPitch() {
   if (leftMetronome) {
-    updateMetronome(leftMetronome, 0); // Using a pitch value of 0 for C3
+    updateMetronome(leftMetronome, -1); // Set pan value to -1 for left
   }
 }
 
 function updateRightPitch() {
   if (rightMetronome) {
-    updateMetronome(rightMetronome, 0); // Using a pitch value of 0 for F3
+    updateMetronome(rightMetronome, 1); // Set pan value to 1 for right
   }
 }
 
-function updateMetronome(metronome, pitch) {
+function updateMetronome(metronome, panValue) {
   // Use predefined pitches for the left and right metronomes
-  const pitchValue = metronome === leftMetronome ? 'C3' : 'F3';
+  const pitchValue = metronome === leftMetronome ? fixedPitchLeft : fixedPitchRight;
 
   // Ensure pitch is a valid finite number
   const frequency = parseFloat(pitchValue);
@@ -55,14 +61,16 @@ function updateMetronome(metronome, pitch) {
 
   metronome.gainNode.gain.setValueAtTime(1, audioContext.currentTime);
   metronome.gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
-}
 
+  // Set the pan value
+  metronome.panNode.pan.value = panValue;
+}
 
 function startAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    leftMetronome = createMetronome();
-    rightMetronome = createMetronome();
+    leftMetronome = createMetronome(-1); // Initialize left metronome with pan value -1
+    rightMetronome = createMetronome(1); // Initialize right metronome with pan value 1
     startMetronomes();
   }
 }
